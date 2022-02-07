@@ -25,7 +25,7 @@ public:
     void save_tree(std::stringstream& ss, std::shared_ptr<Node>& node);
     void load_tree(std::string& serialized_tree);
     void load_state(const std::string& file_name);
-    void save_state(const std::string& file_name, std::string& snapshot_reason);
+    void save_state(const std::string& file_name, const std::string& snapshot_reason);
     std::string get_snapshot_reason(std::string& change_type);
     std::vector<std::string> add_log_message (std::string& log_message);
     
@@ -138,7 +138,7 @@ void TemplateMiner::load_tree(std::string& serialized_tree){
 }
 
 
-void TemplateMiner::save_state(const std::string& filename, std::string& snapshot_reason ){//fs.write(stringname.c_str(),sizeof(char)*stringname.size)
+void TemplateMiner::save_state(const std::string& filename, const std::string& snapshot_reason ){//fs.write(stringname.c_str(),sizeof(char)*stringname.size)
 
     auto fs = std::ofstream(filename, std::ios::out | std::ios::binary );
     if (!fs.is_open()) std::cout << "failed to open " << filename << '\n';
