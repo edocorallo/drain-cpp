@@ -5,21 +5,6 @@ Drain3 is an online log template miner that can extract templates (clusters) fro
 
 Drain3 continuously learns on-the-fly and extracts log templates from raw log entries.
 
-Example:
-For the input:
-
-connected to 10.0.0.1
-connected to 192.168.0.1
-Hex number 0xDEADBEAF
-user davidoh logged in
-user eranr logged in
-
-Drain3 extracts the following templates:
-
-ID=1     : size=2         : connected to <:IP:>
-ID=2     : size=1         : Hex number <:HEX:>
-ID=3     : size=2         : user <:*:> logged in
-
 Read more information about Drain from the following paper:
 
 Pinjia He, Jieming Zhu, Zibin Zheng, and Michael R. Lyu. Drain: An Online Log Parsing Approach with Fixed Depth Tree, Proceedings of the 24th International Conference on Web Services (ICWS), 2017.
