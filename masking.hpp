@@ -4,18 +4,6 @@
 #include<regex>
 #include<utility>
 
-//https://github.com/Tencent/rapidjson/ 
-//configparser
-//logging
-// std::string config_path = "";
-// class MaskingInstruction{//this whole class server the sole purpose to be filled with config values...
-//     public:
-//         std::string regex_pattern;
-//         std::string mask_with;
-//         std::basic_regex<char> regex;
-//         MaskingInstruction(std::string regex_pattern,std::string mask_with);
-// };
-
 
 
 
