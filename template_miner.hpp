@@ -152,7 +152,7 @@ void TemplateMiner::save_state(const std::string& filename, const std::string& s
         ss<<"{";
         save_tree(ss,root);
         std::size_t bytes = sizeof(char)*ss.str().size();
-        fs.write(ss.str().c_s(),bytes);
+        fs.write(ss.str().c_str(),bytes);
         fs.close();
         std::cout<<"\n====================================\n save_state ends"<<std::endl;
     }
