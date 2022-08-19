@@ -36,7 +36,7 @@ Node::Node(const Node& node){
     for(auto pair : node.key_to_child_node) this->key_to_child_node.insert(pair);
     //for(auto it = node.clusters.begin(); it != node.clusters.end();it++) 
     //    this->clusters=node.clusters;/*emplace_back(it->log_template_tokens, it->cluster_id, it->size)*/;
-    std::cout<<"COPIED NODE\n";
+    //std::cout<<"COPIED NODE\n";
 };
 
 Node::Node(Node&& other) noexcept :
@@ -45,7 +45,7 @@ Node::Node(Node&& other) noexcept :
     clusters(std::move(other.clusters)),
     key_to_child_node(std::move(other.key_to_child_node))
 {
-    std::cout<<"MOVED NODE\n";
+    //std::cout<<"MOVED NODE\n";
 };
 
 Node::Node(){
@@ -57,7 +57,7 @@ Node& Node::operator = (const Node& other){
     depth = other.depth;
     clusters = other.clusters;
     key_to_child_node = other.key_to_child_node;
-    std::cout<<"NODE HAS BEEN COPY-ASSIGNED\n";
+    //std::cout<<"NODE HAS BEEN COPY-ASSIGNED\n";
     return *this;
 }
 
@@ -66,7 +66,7 @@ Node& Node::operator = (Node&& other){
     this->depth = std::move(other.depth);
     this->clusters = std::move(other.clusters);
     this->key_to_child_node = std::move(other.key_to_child_node);
-    std::cout<<"NODE HAS BEEN MOVE-ASSIGNED\n";
+    //std::cout<<"NODE HAS BEEN MOVE-ASSIGNED\n";
     return *this;
 }
 

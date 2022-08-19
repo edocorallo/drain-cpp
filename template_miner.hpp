@@ -70,12 +70,11 @@ void TemplateMiner::save_tree (std::stringstream& fs, std::shared_ptr<Node>& nod
 };
 
 void TemplateMiner::load_tree(std::string& serialized_tree){
-    if(serialized_tree.find_first_of("{") == serialized_tree.npos) return;//base case #1: no parenthesis
+    if(serialized_tree.find_first_of("{") == serialized_tree.npos) return;//base case: no parenthesis
     
-    if (serialized_tree.starts_with("}")) {//"base" case #2: broken parenthesis to be fixed
+    while (serialized_tree.starts_with("}")) {//broken parenthesis to be fixed
         serialized_tree.erase(0,1);
         serialized_tree.push_back('}');
-        return load_tree(serialized_tree);
     }
     
     //get rid of leading "{" and ending "}"
@@ -100,6 +99,7 @@ void TemplateMiner::load_tree(std::string& serialized_tree){
     std::vector<std::string> template_tokens;
     uint templ_token_lenght=0;
     static std::string branch_key;
+    branch_key.reserve(50);
 
    //parsing 
     std::getline(ss,node_key,';');
@@ -152,7 +152,7 @@ void TemplateMiner::save_state(const std::string& filename, const std::string& s
         ss<<"{";
         save_tree(ss,root);
         std::size_t bytes = sizeof(char)*ss.str().size();
-        fs.write(ss.str().c_str(),bytes);
+        fs.write(ss.str().c_s(),bytes);
         fs.close();
         std::cout<<"\n====================================\n save_state ends"<<std::endl;
     }
@@ -200,6 +200,7 @@ Leaf (pls) has two clusters stored in it: C2 and C3, while other leafs has only 
         fs.read(buffer,lenght);
         fs.close();
         std::string serialized_tree(buffer);
+        delete[] buffer;
         if(serialized_tree.ends_with("\n")) {
         serialized_tree.pop_back();
         }
