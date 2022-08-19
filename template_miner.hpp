@@ -52,21 +52,32 @@ void TemplateMiner::save_tree (std::stringstream& fs, std::shared_ptr<Node>& nod
     // for (auto cluster : node->clusters){<---copied a logcluster?!
     for (uint i =0; i<node->clusters.size(); i++){
         fs << node->clusters.at(i).cluster_id <<"/"<< node->clusters.at(i).size<<"/";
-        std::cout << node->clusters.at(i).cluster_id<<"/"<<node->clusters.at(i).size<<"/";
-        for (auto token : node->clusters.at(i).log_template_tokens){fs<<token<<",";std::cout<<token<<",";}
+        //std::cout << node->clusters.at(i).cluster_id<<"/"<<node->clusters.at(i).size<<"/";
+        for (auto token : node->clusters.at(i).log_template_tokens){
+            fs<<token<<",";
+            //std::cout<<token<<",";
+            }
         fs<<"_";
-        std::cout<<"_";
+        //std::cout<<"_";
     }
 
-    if(node->depth == this->drain.depth) {fs<<"}"; std::cout<<"}"; return;}
+    if(node->depth == this->drain.depth) {
+        fs<<"}"; 
+        //std::cout<<"}";
+        return;
+        }
 
 
 
 
     //key_to_child_node
     for (auto pair = node->key_to_child_node.begin(); pair != node->key_to_child_node.end(); pair++ ){
-        fs<<"{";std::cout<<"{"; save_tree(fs, pair->second);}
-    fs<<"}"; std::cout<<"}"; 
+        fs<<"{";
+        //std::cout<<"{";
+        save_tree(fs, pair->second);
+        }  
+    fs<<"}";
+    //std::cout<<"}"; 
 };
 
 void TemplateMiner::load_tree(std::string& serialized_tree){
@@ -143,7 +154,7 @@ void TemplateMiner::save_state(const std::string& filename, const std::string& s
     auto fs = std::ofstream(filename, std::ios::out | std::ios::binary );
     if (!fs.is_open()) std::cout << "failed to open " << filename << '\n';
     else{
-        std::cout<<"\nsave_state begins \n===================================="<<std::endl;
+        //std::cout<<"\nsave_state begins \n===================================="<<std::endl;
         
         std::stringstream ss;
 
@@ -154,7 +165,7 @@ void TemplateMiner::save_state(const std::string& filename, const std::string& s
         std::size_t bytes = sizeof(char)*ss.str().size();
         fs.write(ss.str().c_str(),bytes);
         fs.close();
-        std::cout<<"\n====================================\n save_state ends"<<std::endl;
+        //std::cout<<"\n====================================\n save_state ends"<<std::endl;
     }
    
     fs.close();
