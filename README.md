@@ -1,5 +1,5 @@
 # drain-cpp
-A c++ implementation of Drain3 (https://github.com/IBM/Drain3) 
+A c++ implementation of Drain3 (https://github.com/logpai/Drain3) 
 "
 Drain3 is an online log template miner that can extract templates (clusters) from a stream of log messages in a timely manner. It employs a parse tree with fixed depth to guide the log group search process, which effectively avoids constructing a very deep and unbalanced tree.
 
@@ -15,4 +15,4 @@ Please compile with -std=c++2a because i made wide use of modern standard langua
 
 
 This is an exercise in futility, there is better code maintained by more experienced developers that does the same stuff this one does, but tidier. 
-Seriously, go check the IBM repository for Drain3.
+Seriously, go check LogPai's repository for Drain3.
