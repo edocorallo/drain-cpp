@@ -46,7 +46,7 @@ LogCluster::LogCluster(const LogCluster& cluster){
     this->log_template_tokens = cluster.log_template_tokens;
     this->cluster_id = cluster.cluster_id;
     this->size = cluster.size;
-    std::cout<<"COPIED LOGCLUSTER\n";    
+    std::clog<<"COPIED LOGCLUSTER\n";    
 };
 
 LogCluster::LogCluster(const LogCluster&& cluster) noexcept : 
@@ -54,7 +54,7 @@ LogCluster::LogCluster(const LogCluster&& cluster) noexcept :
     cluster_id(std::move(cluster.cluster_id)),
     size(std::move(cluster.size))
     {
-        std::cout<<"LOGCLUSTER MOVED\n";
+        std::clog<<"LOGCLUSTER MOVED\n";
     };
 
 LogCluster::LogCluster(){
@@ -65,7 +65,7 @@ LogCluster& LogCluster::operator = (LogCluster&& other){
     this->log_template_tokens = std::move(other.log_template_tokens);
     this->cluster_id = std::move(other.cluster_id);
     this->size = std::move(other.size);
-    std::cout<<"LOGCLUSTER HAS BEEN MOVE-ASSIGNED\n";
+    std::clog<<"LOGCLUSTER HAS BEEN MOVE-ASSIGNED\n";
     return *this;
 }; 
 
@@ -73,7 +73,7 @@ LogCluster& LogCluster::operator = (const LogCluster& other){
     log_template_tokens = other.log_template_tokens;
     cluster_id = other.cluster_id;
     size = other.size;
-    std::cout<<"LOGCLUSTER HAS BEEN COPY-ASSIGNED\n";
+    std::clog<<"LOGCLUSTER HAS BEEN COPY-ASSIGNED\n";
     return *this;
 }; 
 

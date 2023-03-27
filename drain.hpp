@@ -29,10 +29,10 @@ class Drain{
     Drain(const uint& depth=4, const float& sim_th=0.4, const uint& max_children=100);
 
     bool has_numbers(std::string& s);
-    LogCluster tree_search(Node& root_node, std::vector<std::string>& tokens);
+    std::optional<LogCluster> tree_search(Node& root_node, std::vector<std::string>& tokens);
     void add_seq_to_prefix_tree(Node& root_node, LogCluster& cluster);
     std::pair<float,int> get_seq_distance(std::vector<std::string>& templ, std::vector<std::string>& seq);//?
-    LogCluster fast_match(std::vector<LogCluster>& cluster_list, std::vector<std::string>& tokens);
+    std::optional<LogCluster> fast_match(std::vector<LogCluster>& cluster_list, std::vector<std::string>& tokens);
     std::vector<std::string> get_template(std::vector<std::string>& templ, std::vector<std::string>& seq);
     void print_tree();
     void print_node(Node& node, const uint& depth);
@@ -57,22 +57,23 @@ bool Drain::has_numbers(std::string& s){
     return (s.find_first_of("0123456789") != std::string::npos);
 };
 
-LogCluster Drain::tree_search(Node& root_node, std::vector<std::string>& tokens){//returns std::optional<LogCluster>
+std::optional<LogCluster> Drain::tree_search(Node& root_node, std::vector<std::string>& tokens){//<<<<<<NOT WORKING ANYMORE, AS EXPECTED
     std::stringstream ss; ss<<tokens.size(); std::string tokensize = ss.str();
-    LogCluster out_cluster;
+        
+    if(!tokens.size()){
+        std::clog<<"empty log line \n";
+        return std::nullopt;
+    }
     std::shared_ptr<Node> parent_node;
-    
     try{//try traversing from Root to tokensize
+    //still needs a "try-catch"
         parent_node = root_node.key_to_child_node.at(tokensize);
+       
     }
     catch (const std::exception&){
         std::clog<<"No template with the same token count"<<'\n';
-        throw;//just throw it dude
-    }
-    if(!tokens.size()){//DA RIVEDERE
-        out_cluster = root_node.key_to_child_node.at(tokensize)->clusters.at(0);
-        std::cout<<"empty log line \n";
-        return out_cluster;//empty string
+        return std::nullopt;
+        //parent_node = nullptr
     }
     
     uint current_depth = 1;
@@ -80,25 +81,33 @@ LogCluster Drain::tree_search(Node& root_node, std::vector<std::string>& tokens)
     //if at max depth or last token in tokens, break
         if ((current_depth == this->depth) || (current_depth == tokens.size())) break;
 
-        //std::unordered_map<std::string,std::shared_ptr<Node>> new_key_to_child_node = parent_node->key_to_child_node;//WeirdChamp
-        if (parent_node->key_to_child_node.find(token) != parent_node->key_to_child_node.end())
-            parent_node = parent_node->key_to_child_node.at(token);
-        else if (parent_node->key_to_child_node.find(param_str) != parent_node->key_to_child_node.end())
-            parent_node = parent_node->key_to_child_node.at(param_str);
-        else
-            throw std::logic_error("token not found in tree_search().");
+        std::unordered_map<std::string,std::shared_ptr<Node>> new_key_to_child_node = parent_node->key_to_child_node;//WeirdChamp
+        try {
+            parent_node = new_key_to_child_node.at(token);
+        }
+        catch (std::exception& ){
+            parent_node = nullptr;
+        }
+        if (!parent_node){//exact token not found, rroceed with <*>
+            try{
+                parent_node = new_key_to_child_node.at(param_str);
+            }
+            catch(std::exception&){//wildcard string (<*>) not found, return
+                return std::nullopt;
+            }
+        }
+        
+        // if (parent_node->key_to_child_node.find(token) != parent_node->key_to_child_node.end())
+        //     parent_node = parent_node->key_to_child_node.at(token);
+        // else if (parent_node->key_to_child_node.find(param_str) != parent_node->key_to_child_node.end())
+        //     parent_node = parent_node->key_to_child_node.at(param_str);
+        // else
+        //     std::clog<<"token not found in tree_search().\n";
+        //     return std::nullopt;
+
         current_depth++;    
     }
-
-    try{
-    out_cluster = this->fast_match(parent_node->clusters,tokens);//copia
-    }   catch (...){
-            throw;
-        }
-    std::cout<<"cluster found in tree_search"<<'\n';
-
-    //std::cout<<"out_cluster.log_template_tokens.size() in tree_search: "<<out_cluster.log_template_tokens.size()<<'\n';
-    return out_cluster;
+    return this->fast_match(parent_node->clusters,tokens);
 };
 
 void Drain::add_seq_to_prefix_tree(Node& root_node, LogCluster& cluster){
@@ -156,7 +165,7 @@ void Drain::add_seq_to_prefix_tree(Node& root_node, LogCluster& cluster){
                     else parent_node = parent_node->key_to_child_node.at(param_str);
                 }
             }
-            else {//has_numbers(token) = true
+            else {//has_numbers(token) == true
                 if(parent_node->key_to_child_node.find(param_str) == parent_node->key_to_child_node.end()){
                     std::shared_ptr<Node> new_node = std::make_shared<Node>(param_str, current_depth+1);
                     std::pair<std::string,std::shared_ptr<Node>> new_pair(param_str, new_node);
@@ -188,11 +197,11 @@ std::pair<float,int> Drain::get_seq_distance(std::vector<std::string>& templ, st
     return output;
 };
 
-LogCluster Drain::fast_match(std::vector<LogCluster>& cluster_list, std::vector<std::string>& tokens){
+std::optional<LogCluster> Drain::fast_match(std::vector<LogCluster>& cluster_list, std::vector<std::string>& tokens){
     LogCluster match_cluster;
     float max_sim = -1.;
     int max_param_count = -1;
-    uint cluster_index=0;
+    uint cluster_index = 0;
     uint matched_index = 0;
     for(auto cluster : cluster_list){//ONCE AGAIN for(auto x : collection) makes copies
     //for (auto cluster = cluster_list.begin(); cluster != cluster_list.end();cluster++){
@@ -205,17 +214,18 @@ LogCluster Drain::fast_match(std::vector<LogCluster>& cluster_list, std::vector<
         }
         cluster_index++;
     }
+
     if (max_sim >= this->sim_th){
         //std::cout<<"match_cluster.log_template_tokens.size() in fast_match(): "<<match_cluster.log_template_tokens.size()<<'\n';
         match_cluster.size++;
         cluster_list.at(matched_index).size++;
         std::vector<std::string> new_templ_tokens = this->get_template(tokens,cluster_list.at(matched_index).log_template_tokens);
         cluster_list.at(matched_index).log_template_tokens=new_templ_tokens;
-        return match_cluster;
+        return std::make_optional<LogCluster>(match_cluster);
     }
-    throw std::logic_error("cluster not found in fast_match()");
-};
-
+    return std::nullopt;
+    
+}
 std::vector<std::string> Drain::get_template(std::vector<std::string>& templ, std::vector<std::string>& seq){
     assert (templ.size() == seq.size());//need something if assert fails
     std::vector<std::string> out_templ;
@@ -247,7 +257,6 @@ std::pair<LogCluster,std::string> Drain::add_log_message(std::string& content){
 
     std::stringstream ss; ss<<"C"<<this->clusters.size()+1; std::string cluster_id = ss.str();
     std::istringstream iss (content);
-
     LogCluster out_cluster;
     std::string update_type;
     if (content.find_first_not_of(" \t\v\r\n") != std::string::npos){//some problems with tabs
@@ -260,44 +269,46 @@ std::pair<LogCluster,std::string> Drain::add_log_message(std::string& content){
 
     std::vector<std::string> content_tokens;
     while (std::getline(iss,update_type,' ')) {//using update_type because i don't want to initialize another string
-        //std::cout<<"content.substr: "<<update_type<<'\n';
         content_tokens.push_back(update_type);
         update_type.erase();
     }
     
     //for(auto token : content_tokens) std::cout<<token<<'\n';
+//std::optional<std::string> opt = "abc";
+// "take" the contained value by calling operator* on a rvalue to optional
+//auto taken = *std::move(opt);
+    
+    std::optional<LogCluster> tree_search_result = this->tree_search(this->root_node,content_tokens);
+    if (tree_search_result.has_value()){
+        // "take" the contained value by calling operator* on a rvalue to optional
+        out_cluster = std::move(*tree_search_result);
 
-    try{
-        out_cluster = this->tree_search(this->root_node,content_tokens);
-        //std::cout<<"out_cluster.log_template_tokens.size() in try{} :"<<out_cluster.log_template_tokens.size()<<'\n';
-    }   catch(...){
-            out_cluster = LogCluster(content_tokens,cluster_id,1);
-            this->clusters.emplace_back(content_tokens,cluster_id,1);
-            this->add_seq_to_prefix_tree(this->root_node, out_cluster);
-            update_type = "cluster_created";
-            return std::make_pair(out_cluster, update_type);//seems like I can't avoid this copy-------------
+        std::vector<std::string> new_templ_tokens = this->get_template(content_tokens,out_cluster.log_template_tokens); 
+        std::stringstream sst;
+        for(auto token : new_templ_tokens){
+            sst<<token<<" ";
         }
-    //std::cout<<"out_cluster.log_template_tokens.size() outside try{} :"<<out_cluster.log_template_tokens.size()<<'\n';
-    //for(auto token : content_tokens) std::cout<<token<<'\n';
-    //std::cout<<"content_tokens.size(): "<<content_tokens.size()<<", out_cluster.log_template_tokens.size(): "<<out_cluster.log_template_tokens.size()<<'\n';        
-    std::vector<std::string> new_templ_tokens = this->get_template(content_tokens,out_cluster.log_template_tokens); 
-    std::stringstream sst;
-    for(auto token : new_templ_tokens){
-        sst<<token<<" ";
-    }
-    std::string new_templ = sst.str();
-    if ( new_templ != out_cluster.get_template()){
-        out_cluster.log_template_tokens.erase(out_cluster.log_template_tokens.begin(),out_cluster.log_template_tokens.end());
-        // for(uint i = 0; i< new_templ_tokens.size(); i++)
-        //     out_cluster.log_template_tokens.push_back(new_templ_tokens.at(i));
-        out_cluster.log_template_tokens = new_templ_tokens;
-        update_type = "cluster_template_changed";
-    }
-    else {
+        std::string new_templ = sst.str();
+        if ( new_templ != out_cluster.get_template()){
+            out_cluster.log_template_tokens.erase(out_cluster.log_template_tokens.begin(),out_cluster.log_template_tokens.end());
+            // for(uint i = 0; i< new_templ_tokens.size(); i++)
+            //     out_cluster.log_template_tokens.push_back(new_templ_tokens.at(i));
+            out_cluster.log_template_tokens = new_templ_tokens;
+            update_type = "cluster_template_changed";
+        }
+        else {
         update_type = "none";
+        }
     }
-
-    return std::make_pair(out_cluster, update_type);//seems like I can't avoid this copy---------------
+    else{
+        out_cluster = LogCluster(content_tokens,cluster_id,1);
+        this->clusters.emplace_back(content_tokens,cluster_id,1);
+        this->add_seq_to_prefix_tree(this->root_node, out_cluster);
+        update_type = "cluster_created";
+   
+    }
+    return std::make_pair(out_cluster, update_type);
+    
 };
 
 long unsigned int Drain::get_total_cluster_size(){

@@ -67,9 +67,6 @@ void TemplateMiner::save_tree (std::stringstream& fs, std::shared_ptr<Node>& nod
         return;
         }
 
-
-
-
     //key_to_child_node
     for (auto pair = node->key_to_child_node.begin(); pair != node->key_to_child_node.end(); pair++ ){
         fs<<"{";
@@ -118,7 +115,7 @@ void TemplateMiner::load_tree(std::string& serialized_tree){
     uint depth = std::stoi(node_depth);
     
     
-    if(depth == 1){//ROOT node is always constructed within drain, within template_miner. no need to do it again
+    if(depth == 1){//ROOT node is always constructed within drain, within template_miner. no need to do it again (?)
         std::shared_ptr<Node> node = std::make_shared<Node>(node_key,depth);
         std::pair<std::string, std::shared_ptr<Node>> pair (node_key, node);
         this->drain.root_node.key_to_child_node.insert(pair);//
@@ -152,14 +149,13 @@ void TemplateMiner::load_tree(std::string& serialized_tree){
 void TemplateMiner::save_state(const std::string& filename, const std::string& snapshot_reason ){//fs.write(stringname.c_str(),sizeof(char)*stringname.size)
 
     auto fs = std::ofstream(filename, std::ios::out | std::ios::binary );
-    if (!fs.is_open()) std::cout << "failed to open " << filename << '\n';
+    if (!fs.is_open()) std::cerr << "failed to open " << filename << '\n';
     else{
         //std::cout<<"\nsave_state begins \n===================================="<<std::endl;
         
         std::stringstream ss;
 
         std::shared_ptr<Node> root = std::make_shared<Node>(this->drain.root_node);//copy made here
-        //stay tuned to see if I can make a shared_ptr without copying all this shit
         ss<<"{";
         save_tree(ss,root);
         std::size_t bytes = sizeof(char)*ss.str().size();
@@ -196,11 +192,11 @@ Leaf (pls) has two clusters stored in it: C2 and C3, while other leafs has only 
 
 
     std::ifstream fs(filename, std::ios::in | std::ios::binary);
-    if (!fs.is_open()) std::cout << "failed to open " << filename << '\n';
+    if (!fs.is_open()) std::cerr << "failed to open " << filename << '\n';
     else{
         //if file is empty, skip the loading phase
         if (fs.peek() == std::ifstream::traits_type::eof()){
-            std::cout<<"empty file, continuing...\n";
+            std::clog<<"empty file, continuing...\n";
             return;
         }
         fs.seekg(0,fs.end);
@@ -252,7 +248,7 @@ std::vector<std::string> TemplateMiner::add_log_message(std::string& log_message
     std::string snapshot_reason = this->get_snapshot_reason(bundle.second);
     //std::cout<<"snapshot_reason: "<<snapshot_reason<<std::endl;
     if(snapshot_reason != "none"){
-        std::cout<<"calling save_state\n";
+        std::clog<<"calling save_state\n";
         this->save_state("persistence.bin", snapshot_reason);
         this->last_save_time = std::chrono::system_clock::now();
     }
